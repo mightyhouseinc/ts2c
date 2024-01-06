@@ -18,7 +18,7 @@ def convertType(type):
         return "string"
     elif type == "void":
         return "void"
-    elif type[0:6] == "struct":
+    elif type[:6] == "struct":
         return re.sub(r'\s*\*\s*$','',type[7:])
     else:
         return ""
@@ -26,13 +26,22 @@ def convertType(type):
 for func in cppHeader.functions:
     params = []
     for index, param in enumerate(func["parameters"]):
-        name = param["name"] or "p" + str(index + 1)
+        name = param["name"] or f"p{str(index + 1)}"
         type = convertType(param["type"])
         annotation = "" if type else "/** @ctype " + param["type"] + " */ "
-        params.append(annotation + name + (": " + type if type else ""))
+        params.append(annotation + name + (f": {type}" if type else ""))
 
     name = func["name"]
     type = convertType(func["rtnType"])
     annotation = "" if type else "/** @ctype " + func["rtnType"] + " */\n"
-    func_s = "\n" + annotation + "function " + func["name"] + "(" + ", ".join(params) + ")" + (": " + type if type else "")
-    print("%s"%func_s)
+    func_s = (
+        "\n"
+        + annotation
+        + "function "
+        + func["name"]
+        + "("
+        + ", ".join(params)
+        + ")"
+        + (f": {type}" if type else "")
+    )
+    print(f"{func_s}")
